@@ -617,7 +617,7 @@
               return remaining > 0 && remaining <= 30 * 60 * 1000;
             }).length; %>
             <p class="section-note">今日は <%= stats.completedTasks %> 件進んだ。未完了は <%= Math.max(0, stats.totalTasks - stats.completedTasks) %> 件。</p>
-            <p class="section-note">⚠️締め切り30分以内のタスクは<%= urgent30Count %>件</p>
+            <p class="section-note">⚠️締め切り30分以内のタスクは<span id="urgent30-count"><%= urgent30Count %></span>件</p>
           </div>
         </section>
 
@@ -1074,6 +1074,7 @@
         const thresholds = [30, 10, 5];
 
         const tick = () => {
+          renderUrgentDeadlineCount();
           const now = Date.now();
           for (const task of deadlineTasks) {
             if (!task || task.completed || !task.dueDate) continue;
@@ -1094,6 +1095,7 @@
           saveState();
         };
 
+        renderUrgentDeadlineCount();
         tick();
         window.setInterval(tick, 15000);
       }
@@ -1350,6 +1352,21 @@
         const levelEl = document.getElementById("status-user-level");
         if (levelEl) {
           levelEl.textContent = `Lv ${Math.max(1, Number(state.stats.userLevel) || 1)}`;
+        }
+      }
+
+      function renderUrgentDeadlineCount() {
+        const urgentCount = deadlineTasks.filter((task) => {
+          if (!task || task.completed || !task.dueDate) return false;
+          const dueAt = new Date(task.dueDate).getTime();
+          if (!Number.isFinite(dueAt)) return false;
+          const remaining = dueAt - Date.now();
+          return remaining > 0 && remaining <= 30 * 60 * 1000;
+        }).length;
+
+        const urgentCountEl = document.getElementById("urgent30-count");
+        if (urgentCountEl) {
+          urgentCountEl.textContent = String(urgentCount);
         }
       }
 
