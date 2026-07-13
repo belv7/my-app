@@ -17,3 +17,21 @@ model User {
   name String
   age  Int?
 }
+
+model Task {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String   @default("")
+  category       String   @default("general")
+  priority       Int      @default(2)
+  completed      Boolean  @default(false)
+  dueDate        DateTime?
+  progressRate   Int      @default(0)
+  plannedMinutes Int      @default(30)
+  actualMinutes  Int      @default(0)
+  xpReward       Int      @default(10)
+  coinReward     Int      @default(5)
+  materialReward Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
