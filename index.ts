@@ -5,9 +5,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 import {
   buildDashboardStats,
-  calculatePriorityLabel,
+  buildMinoStockSummary,
   calculateStatusLabel,
-  getCategoryLabel,
   type TaskViewModel,
 } from "./lib/dashboard.ts";
 
@@ -44,9 +43,6 @@ function toTaskViewModel(task: {
     id: task.id,
     title: task.title,
     description: task.description,
-    category: task.category,
-    categoryLabel: getCategoryLabel(task.category),
-    priority: task.priority,
     completed: task.completed,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
@@ -56,14 +52,8 @@ function toTaskViewModel(task: {
     xpReward: task.xpReward,
     coinReward: task.coinReward,
     materialReward: task.materialReward,
-    priorityLabel: calculatePriorityLabel(task.priority),
     statusLabel: calculateStatusLabel(task),
   };
-}
-
-function parsePriority(value: unknown): number {
-  const priorityValue = Number(value ?? 2);
-  return Number.isInteger(priorityValue) && priorityValue >= 1 && priorityValue <= 4 ? priorityValue : 2;
 }
 
 function parseDueDate(value: unknown): { dueDate: Date | null; valid: boolean } {
@@ -91,7 +81,7 @@ function formatDueDateForInput(dueDate: Date | null): string {
 // 一覧表示の画面
 app.get("/", async (req, res) => {
   const tasks = await prisma.task.findMany({
-    orderBy: [{ completed: "asc" }, { priority: "asc" }, { dueDate: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ completed: "asc" }, { dueDate: "asc" }, { createdAt: "desc" }],
   });
 
   const taskViews = tasks.map((task) => ({
@@ -99,15 +89,28 @@ app.get("/", async (req, res) => {
     dueDateInput: formatDueDateForInput(task.dueDate),
   }));
 
-  res.render("index", { tasks: taskViews, stats: buildDashboardStats(taskViews) });
+  const stats = buildDashboardStats(taskViews);
+  const minoStock = buildMinoStockSummary(taskViews);
+  const tetrisSeedPieces = [...minoStock.tokens]
+    .sort((a, b) => b.taskId - a.taskId)
+    .slice(0, 2);
+  const tetrisSeedCounts = tetrisSeedPieces.reduce<Record<string, number>>((acc, token) => {
+    acc[token.type] = (acc[token.type] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  res.render("index", {
+    tasks: taskViews,
+    stats,
+    tetrisSeedPieces,
+    tetrisSeedCounts,
+  });
 });
 
 // タスクを追加する処理
 app.post("/tasks", async (req, res) => {
   const title = String(req.body.title ?? "").trim();
   const description = String(req.body.description ?? "").trim();
-  const category = String(req.body.category ?? "general").trim() || "general";
-  const priority = parsePriority(req.body.priority);
   const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate);
 
   if (title && hasValidDueDate) {
@@ -115,8 +118,8 @@ app.post("/tasks", async (req, res) => {
       data: {
         title,
         description,
-        category,
-        priority,
+        category: "general",
+        priority: 2,
         dueDate: dueDate ?? undefined,
       },
     });
@@ -134,8 +137,6 @@ app.post("/tasks/:id/edit", async (req, res) => {
 
   const title = String(req.body.title ?? "").trim();
   const description = String(req.body.description ?? "").trim();
-  const category = String(req.body.category ?? "general").trim() || "general";
-  const priority = parsePriority(req.body.priority);
   const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate);
   const progressRate = clampInt(req.body.progressRate, 0, 100, 0);
   const plannedMinutes = clampInt(req.body.plannedMinutes, 1, 480, 30);
@@ -147,8 +148,8 @@ app.post("/tasks/:id/edit", async (req, res) => {
       data: {
         title,
         description,
-        category,
-        priority,
+        category: "general",
+        priority: 2,
         dueDate,
         progressRate,
         plannedMinutes,
@@ -163,15 +164,23 @@ app.post("/tasks/:id/edit", async (req, res) => {
 // タスクの完了状態を切り替える処理
 app.post("/tasks/:id/toggle", async (req, res) => {
   const taskId = Number(req.params.id);
+  const rewardActionRaw = String(req.body.rewardAction ?? "");
+  const rewardAction = rewardActionRaw === "stock" || rewardActionRaw === "start" ? rewardActionRaw : "stock";
 
   if (Number.isInteger(taskId)) {
     const task = await prisma.task.findUnique({ where: { id: taskId } });
 
     if (task) {
+      const nextCompleted = !task.completed;
       await prisma.task.update({
         where: { id: taskId },
-        data: { completed: !task.completed },
+        data: { completed: nextCompleted },
       });
+
+      if (!task.completed && nextCompleted) {
+        res.redirect(`/?rewardAction=${rewardAction}&rewardTaskId=${taskId}`);
+        return;
+      }
     }
   }
 
@@ -189,8 +198,8 @@ app.post("/tasks/:id/duplicate", async (req, res) => {
         data: {
           title: `${task.title} の複製`,
           description: task.description,
-          category: task.category,
-          priority: task.priority,
+          category: "general",
+          priority: 2,
           dueDate: task.dueDate,
           progressRate: task.progressRate,
           plannedMinutes: task.plannedMinutes,

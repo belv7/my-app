@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Task Board</title>
+  <title>TASK BLOCK</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap");
+
     :root {
       color-scheme: light;
-      --bg: #f5efe3;
-      --bg-2: #e6dcc6;
-      --panel: rgba(255, 255, 255, 0.84);
-      --panel-strong: #fffdf8;
-      --text: #20252b;
-      --muted: #66707a;
-      --line: #d6cab5;
-      --brand: #0f766e;
-      --brand-strong: #115e59;
-      --sky: #7db8d9;
-      --sun: #f6b74a;
-      --grass: #8bb36d;
-      --stone: #786d61;
-      --danger: #b42318;
-      --shadow: 0 18px 50px rgba(31, 35, 40, 0.12);
+      --ink: #16122b;
+      --bg: #1d1830;
+      --panel: #f7efc8;
+      --panel-hi: #fff9de;
+      --line: #3b305f;
+      --muted: #5b5670;
+      --accent: #23b17b;
+      --accent-deep: #12765a;
+      --danger: #d04f3a;
+      --warning: #d4931f;
+      --info: #426fd1;
+      --pixel-shadow: 0 4px 0 #211a3d;
+      --board-bg: #202731;
+      --board-cell: #2f3a47;
     }
 
     * {
@@ -30,242 +31,512 @@
 
     body {
       margin: 0;
-      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(125, 184, 217, 0.38), transparent 32%),
-        radial-gradient(circle at top right, rgba(246, 183, 74, 0.28), transparent 26%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
       min-height: 100vh;
+      color: var(--ink);
+      font-family: "DotGothic16", "Hiragino Kaku Gothic ProN", sans-serif;
+      background:
+        repeating-linear-gradient(0deg, #221b37 0, #221b37 16px, #2a2242 16px, #2a2242 32px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 16px, transparent 16px, transparent 32px);
     }
 
     .shell {
-      max-width: 1080px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 32px 20px 56px;
+      padding: 24px 16px 40px;
     }
 
     .hero {
       display: grid;
-      gap: 18px;
-      margin-bottom: 22px;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 14px;
+      background: linear-gradient(180deg, #fff7d7, #f0e3b8);
+      border: 4px solid var(--line);
+      box-shadow: var(--pixel-shadow);
     }
 
     .eyebrow {
       margin: 0;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      font-size: 12px;
-      color: var(--brand-strong);
-      font-weight: 700;
+      color: var(--accent-deep);
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.66rem;
+      line-height: 1.7;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(2.2rem, 5vw, 4.4rem);
-      line-height: 0.95;
-      letter-spacing: -0.06em;
-      max-width: 12ch;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(1.1rem, 2.3vw, 1.8rem);
+      line-height: 1.5;
+      text-shadow: 2px 2px 0 #ffe17a;
+      max-width: 19ch;
     }
 
     .summary {
       margin: 0;
-      max-width: 58ch;
       color: var(--muted);
+      line-height: 1.45;
       font-size: 1rem;
-      line-height: 1.7;
     }
 
     .status-bar {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
+      gap: 8px;
     }
 
     .status-chip {
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(214, 202, 181, 0.9);
-      box-shadow: 0 10px 24px rgba(31, 35, 40, 0.06);
+      padding: 10px;
+      border: 3px solid var(--line);
+      background: #fff8df;
+      box-shadow: 0 3px 0 #2f2750;
     }
 
     .status-chip strong {
       display: block;
-      font-size: 1.35rem;
-      letter-spacing: -0.04em;
+      margin-bottom: 3px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
     }
 
     .status-chip span {
       color: var(--muted);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 20px;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 14px;
       align-items: start;
     }
 
     .stack {
       display: grid;
-      gap: 20px;
+      gap: 14px;
     }
 
     .card {
       background: var(--panel);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(212, 202, 184, 0.8);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
+      border: 4px solid var(--line);
+      box-shadow: var(--pixel-shadow);
     }
 
     .card-inner {
-      padding: 22px;
+      padding: 14px;
     }
 
     .section-title {
-      margin: 0 0 14px;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
+      margin: 0 0 10px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.7rem;
+      line-height: 1.7;
+      color: #2a2046;
     }
 
     .section-note {
-      margin: -6px 0 14px;
+      margin: 0 0 10px;
       color: var(--muted);
-      font-size: 0.94rem;
-      line-height: 1.6;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .hint-note {
+      margin: 0;
+      padding: 10px;
+      background: #ecfff7;
+      border: 2px solid #52a184;
+      color: #155844;
+      font-weight: 700;
+      line-height: 1.45;
     }
 
     form {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     label {
       display: block;
+      margin-bottom: 6px;
       font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-weight: 700;
+      color: #2a2046;
     }
 
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    input[type="datetime-local"],
+    textarea,
+    select {
       width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel-strong);
-      color: var(--text);
-      padding: 14px 16px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 3px solid #4f456e;
+      background: var(--panel-hi);
+      border-radius: 0;
+      color: var(--ink);
       font: inherit;
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    input[type="text"]:focus,
-    input[type="number"]:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+      box-shadow: inset 0 -2px 0 rgba(38, 31, 61, 0.14);
     }
 
     textarea {
-      width: 100%;
       min-height: 96px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel-strong);
-      color: var(--text);
-      padding: 14px 16px;
-      font: inherit;
-      outline: none;
       resize: vertical;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    textarea:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
-    }
-
-    select {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel-strong);
-      color: var(--text);
-      padding: 14px 16px;
-      font: inherit;
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
+    input:focus,
+    textarea:focus,
     select:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+      border-color: var(--accent-deep);
+      box-shadow: inset 0 -2px 0 rgba(17, 116, 91, 0.35), 0 0 0 2px #cff5e8;
     }
 
-    input[type="datetime-local"] {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel-strong);
-      color: var(--text);
-      padding: 14px 16px;
+    .small-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .primary,
+    .secondary,
+    .danger,
+    .info-btn {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border: 3px solid #352c57;
+      border-radius: 0;
       font: inherit;
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
     }
 
-    input[type="datetime-local"]:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    .primary:disabled,
+    .secondary:disabled,
+    .danger:disabled,
+    .info-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     .primary {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      border: 0;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
-      color: white;
-      font: inherit;
-      font-weight: 700;
-      padding: 13px 18px;
-      cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 12px 24px rgba(15, 118, 110, 0.24);
+      background: linear-gradient(180deg, #2ecf9c, #1b946d);
+      color: #082a1f;
+      box-shadow: 0 3px 0 #16573f;
     }
 
-    .primary:hover {
-      filter: brightness(1.03);
-      transform: translateY(-1px);
+    .secondary {
+      background: #fff8df;
+      color: var(--ink);
+      box-shadow: 0 3px 0 #a9945f;
     }
 
-    .primary:active,
-    .secondary:active,
-    .danger:active {
-      transform: translateY(0);
+    .danger {
+      background: #ffd9cf;
+      color: #6e1e0f;
+      box-shadow: 0 3px 0 #a45344;
     }
 
-    .card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .info-btn {
+      background: #d7e6ff;
+      color: #16376a;
+      box-shadow: 0 3px 0 #5776a6;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
     .task {
-      transition: border-color 0.2s ease, background 0.2s ease;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 3px solid #4f456e;
+      background: #fff8df;
+      box-shadow: 0 3px 0 #ad9862;
     }
 
-    .task:not(.completed):hover {
-      border-color: rgba(15, 118, 110, 0.35);
-      background: rgba(255, 255, 255, 0.9);
+    .task.completed {
+      background: #f0ead0;
+      border-color: #6d628f;
     }
 
-    .secondary:hover,
-    .danger:hover {
-      border-color: var(--brand);
+    .task.completed .task-title {
+      color: #5b5570;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .task-meta {
+      display: grid;
+      gap: 6px;
+    }
+
+    .task-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border: 2px solid;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .badge-city {
+      background: #dbd2fa;
+      color: #2f2551;
+      border-color: #66589d;
+    }
+
+    .badge-danger {
+      background: #ffd5cd;
+      color: #6b1709;
+      border-color: #a74b3d;
+    }
+
+    .badge-warning {
+      background: #ffe3ab;
+      color: #5a3b00;
+      border-color: #9f7820;
+    }
+
+    .badge-safe {
+      background: #cbf0e5;
+      color: #124739;
+      border-color: #387766;
+    }
+
+    .task-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .task-description,
+    .task-status {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .edit-panel {
+      margin-top: 8px;
+      border-top: 2px dashed #7b6fa9;
+      padding-top: 8px;
+    }
+
+    .edit-panel summary {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      list-style: none;
+      color: #2d2450;
+      font-weight: 800;
+    }
+
+    .edit-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .edit-panel summary::before {
+      content: ">";
+      margin-right: 8px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.7rem;
+    }
+
+    .edit-panel[open] summary::before {
+      content: "v";
+    }
+
+    .edit-form {
+      margin-top: 8px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .tetris-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .board-shell {
+      background: #0f1320;
+      border: 4px solid #2d3f58;
+      box-shadow: 0 3px 0 #081120;
+      padding: 8px;
+      position: relative;
+    }
+
+    .game-over-banner {
+      position: absolute;
+      inset: 8px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 14, 24, 0.78);
+      color: #ffd166;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      letter-spacing: 0.06em;
+      text-shadow: 0 2px 0 #000;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .game-over-banner.visible {
+      display: flex;
+    }
+
+    #tetris-board {
+      width: 100%;
+      max-width: 460px;
+      aspect-ratio: 1 / 2;
+      background: var(--board-bg);
+      border: 3px solid #4d5d72;
+      image-rendering: pixelated;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .game-side {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stock-item {
+      border: 2px solid #4f456e;
+      background: #fff8df;
+      padding: 8px;
+      display: grid;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .stock-item.active {
+      border-color: #1b8f6b;
+      background: #e9fff7;
+    }
+
+    .stock-item.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .stock-item strong {
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.72rem;
+      line-height: 1.4;
+    }
+
+    .stock-item span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .controls-grid button {
+      min-height: 44px;
+    }
+
+    .stat-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border: 2px solid #4f456e;
+      background: #fff8df;
+      padding: 6px 8px;
+      font-size: 0.92rem;
+    }
+
+    .stat-row-highlight {
+      border-color: #1b8f6b;
+      background: #e9fff7;
+      font-weight: 800;
+    }
+
+    .task.hidden-task {
+      display: none;
+    }
+
+    .show-all-wrap {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .flash {
+      animation: flash-line 220ms steps(2, end);
+    }
+
+    @keyframes flash-line {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.8); }
+      100% { filter: brightness(1); }
+    }
+
+    .empty {
+      margin: 0;
+      border: 3px dashed #655a92;
+      background: #fff8df;
+      color: var(--muted);
+      padding: 16px;
+      line-height: 1.5;
+      text-align: center;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -276,427 +547,45 @@
       }
     }
 
-    .task-list {
-      display: grid;
-      gap: 12px;
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-
-    .task-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .task {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 14px;
-      align-items: center;
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(212, 202, 184, 0.9);
-      background: rgba(255, 255, 255, 0.78);
-    }
-
-    .task.completed .task-title {
-      color: var(--muted);
-      text-decoration: line-through;
-      text-decoration-thickness: 2px;
-    }
-
-    .task-meta {
-      display: grid;
-      gap: 4px;
-    }
-
-    .task-grid .task-meta {
-      gap: 8px;
-    }
-
-    .task-badges {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 2px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      border: 1px solid transparent;
-    }
-
-    .badge-danger {
-      background: rgba(180, 35, 24, 0.12);
-      color: #8f1d16;
-      border-color: rgba(180, 35, 24, 0.18);
-    }
-
-    .badge-warning {
-      background: rgba(220, 124, 0, 0.12);
-      color: #9a5200;
-      border-color: rgba(220, 124, 0, 0.18);
-    }
-
-    .badge-safe {
-      background: rgba(15, 118, 110, 0.12);
-      color: #115e59;
-      border-color: rgba(15, 118, 110, 0.18);
-    }
-
-    .badge-city {
-      background: rgba(120, 109, 97, 0.12);
-      color: var(--stone);
-      border-color: rgba(120, 109, 97, 0.18);
-    }
-
-    .task-title {
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .task-status {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .task-description {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.94rem;
-      line-height: 1.65;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .secondary,
-    .danger {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: white;
-      color: var(--text);
-      font: inherit;
-      font-weight: 600;
-      padding: 10px 14px;
-      cursor: pointer;
-    }
-
-    .danger {
-      color: var(--danger);
-    }
-
-    .edit-panel {
-      margin-top: 10px;
-      border-top: 1px dashed var(--line);
-      padding-top: 12px;
-    }
-
-    .edit-panel summary {
-      display: flex;
-      align-items: center;
-      min-height: 44px;
-      padding: 10px 0;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--brand-strong);
-      list-style: none;
-    }
-
-    .edit-panel summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .edit-form {
-      margin-top: 12px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .city-scene[data-level="1"] { filter: saturate(0.85); }
-    .city-scene[data-level="2"] { filter: saturate(0.95); }
-    .city-scene[data-level="3"],
-    .city-scene[data-level="4"],
-    .city-scene[data-level="5"] { filter: saturate(1.05) brightness(1.02); }
-
-    .city-extra-house,
-    .city-extra-tower,
-    .city-extra-resident {
-      position: absolute;
-      bottom: 48px;
-    }
-
-    .city-extra-house {
-      width: 64px;
-      height: 48px;
-      border-radius: 10px 10px 6px 6px;
-      background: linear-gradient(180deg, #d9b48c, #b78858);
-    }
-
-    .city-extra-tower {
-      width: 40px;
-      height: 72px;
-      border-radius: 12px 12px 6px 6px;
-      background: linear-gradient(180deg, #9db2c4, #66788a);
-    }
-
-    .city-extra-resident {
-      width: 22px;
-      height: 36px;
-      bottom: 40px;
-      border-radius: 10px 10px 8px 8px;
-      background: linear-gradient(180deg, #f1d5b8, #d9a27a);
-    }
-
-    .empty {
-      margin: 0;
-      padding: 28px 20px;
-      color: var(--muted);
-      text-align: center;
-      border: 1px dashed var(--line);
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.55);
-    }
-
-    .city-panel {
-      display: grid;
-      gap: 14px;
-    }
-
-    .city-scene {
-      position: relative;
-      min-height: 220px;
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid rgba(214, 202, 181, 0.9);
-      background:
-        linear-gradient(180deg, rgba(125, 184, 217, 0.45), rgba(255, 255, 255, 0.1)),
-        linear-gradient(180deg, #f7e7b5 0 42%, #aacb88 42% 100%);
-    }
-
-    .sun {
-      position: absolute;
-      right: 28px;
-      top: 24px;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fff7d6 0%, var(--sun) 70%);
-      box-shadow: 0 0 38px rgba(246, 183, 74, 0.44);
-    }
-
-    .cloud {
-      position: absolute;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.78);
-      filter: blur(0.2px);
-    }
-
-    .cloud.one { width: 100px; height: 28px; top: 34px; left: 24px; }
-    .cloud.two { width: 120px; height: 34px; top: 62px; left: 140px; }
-
-    .city-ground {
-      position: absolute;
-      inset: auto 0 0;
-      height: 94px;
-      background: linear-gradient(180deg, rgba(139, 179, 109, 0.95), #73965b);
-    }
-
-    .tree {
-      position: absolute;
-      bottom: 52px;
-      width: 20px;
-      height: 42px;
-      background: linear-gradient(180deg, #8c5b36, #5f3a1f);
-      border-radius: 8px;
-    }
-
-    .tree::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 18px;
-      width: 38px;
-      height: 38px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #b7d68b 0%, #7ea552 70%);
-    }
-
-    .tree.one { left: 26px; }
-    .tree.two { left: 88px; bottom: 48px; }
-
-    .house {
-      position: absolute;
-      left: 152px;
-      bottom: 48px;
-      width: 86px;
-      height: 64px;
-      border-radius: 12px 12px 8px 8px;
-      background: linear-gradient(180deg, #d9b48c, #b78858);
-      box-shadow: inset 0 -8px 0 rgba(255, 255, 255, 0.18);
-    }
-
-    .house::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -28px;
-      width: 0;
-      height: 0;
-      transform: translateX(-50%);
-      border-left: 52px solid transparent;
-      border-right: 52px solid transparent;
-      border-bottom: 30px solid #9a5f37;
-    }
-
-    .house::after {
-      content: "";
-      position: absolute;
-      left: 34px;
-      bottom: 0;
-      width: 18px;
-      height: 24px;
-      background: #fff4d9;
-      border-radius: 10px 10px 0 0;
-      box-shadow: 18px 0 0 #f3e2b7;
-    }
-
-    .tower {
-      position: absolute;
-      left: 270px;
-      bottom: 48px;
-      width: 52px;
-      height: 96px;
-      border-radius: 14px 14px 8px 8px;
-      background: linear-gradient(180deg, #9db2c4, #66788a);
-    }
-
-    .tower::before {
-      content: "";
-      position: absolute;
-      inset: 14px 10px 12px;
-      border-radius: 10px;
-      background: repeating-linear-gradient(180deg, rgba(255,255,255,0.8) 0 10px, rgba(255,255,255,0.25) 10px 18px);
-    }
-
-    .resident {
-      position: absolute;
-      right: 84px;
-      bottom: 40px;
-      width: 26px;
-      height: 42px;
-      border-radius: 12px 12px 10px 10px;
-      background: linear-gradient(180deg, #f1d5b8, #d9a27a);
-    }
-
-    .resident::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -16px;
-      width: 20px;
-      height: 20px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background: #f2caa9;
-    }
-
-    .note-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .note-card {
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(214, 202, 181, 0.9);
-    }
-
-    .note-card strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .note-card p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .small-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .small-card {
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(214, 202, 181, 0.9);
-    }
-
-    .small-card strong {
-      display: block;
-      font-size: 1.2rem;
-      margin-bottom: 4px;
-    }
-
-    .small-card span {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 860px) {
+    @media (max-width: 980px) {
       .status-bar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .grid {
         grid-template-columns: 1fr;
       }
+
+      .tetris-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .game-side {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 640px) {
       .shell {
-        padding: 18px 14px 40px;
+        padding: 14px 12px 30px;
       }
 
+      .hero,
       .card-inner {
-        padding: 18px;
+        padding: 12px;
       }
 
       .status-bar,
-      .small-grid {
+      .small-grid,
+      .game-side {
         grid-template-columns: 1fr;
       }
 
       .task {
         grid-template-columns: 1fr;
-        justify-items: start;
       }
 
-      .actions {
-        width: 100%;
-        justify-content: stretch;
-      }
-
+      .actions,
       .actions form,
       .actions button {
         width: 100%;
@@ -707,14 +596,13 @@
 <body>
   <main class="shell">
     <header class="hero">
-      <p class="eyebrow">City Secretary / Task Board</p>
-      <h1>街を育てるために、今日の1件を終わらせる。</h1>
-      <p class="summary">AI秘書が、その日の最初の一歩を示す。タスクを終えるたびに、街が少しずつ明るくなっていくダッシュボード。</p>
+      <p class="eyebrow">TASK BLOCK</p>
+      <h1>TASK BLOCK</h1>
       <div class="status-bar" aria-label="主要ステータス">
         <div class="status-chip"><strong><%= stats.totalTasks %></strong><span>総タスク数</span></div>
         <div class="status-chip"><strong><%= stats.completionRate %>%</strong><span>完了率</span></div>
-        <div class="status-chip"><strong><%= stats.streakDays %>日</strong><span>ストリーク</span></div>
-        <div class="status-chip"><strong>Lv <%= stats.cityLevel %></strong><span>街レベル</span></div>
+        <div class="status-chip"><strong><%= stats.totalAcquiredMinos %></strong><span>総獲得ミノ</span></div>
+        <div class="status-chip"><strong id="status-user-level">Lv <%= stats.userLevel %></strong><span>ユーザーレベル</span></div>
       </div>
     </header>
 
@@ -722,55 +610,28 @@
       <div class="stack">
         <section class="card">
           <div class="card-inner">
-            <h2 class="section-title">今日のおすすめ</h2>
-            <p class="section-note"><%= stats.morningNote %></p>
-            <div class="note-grid">
-              <div class="note-card">
-                <strong>次にやること</strong>
-                <p><%= stats.nextTaskTitle %></p>
-              </div>
-              <div class="note-card">
-                <strong>夜の振り返り</strong>
-                <p><%= stats.nightNote %></p>
-              </div>
-            </div>
+            <h2 class="section-title">メモ</h2>
+            <% const urgent30Count = tasks.filter((task) => {
+              if (task.completed || !task.dueDate) return false;
+              const remaining = new Date(task.dueDate).getTime() - Date.now();
+              return remaining > 0 && remaining <= 30 * 60 * 1000;
+            }).length; %>
+            <p class="section-note">今日は <%= stats.completedTasks %> 件進んだ。未完了は <%= Math.max(0, stats.totalTasks - stats.completedTasks) %> 件。</p>
+            <p class="section-note">⚠️締め切り30分以内のタスクは<%= urgent30Count %>件</p>
           </div>
         </section>
 
         <section class="card">
           <div class="card-inner">
             <h2 class="section-title">新しいタスク</h2>
-            <p class="section-note">追加した瞬間に街の進行対象になる。まずは1件、気軽に入れていい。</p>
             <form action="/tasks" method="post">
               <div>
                 <label for="title">タスク名</label>
-                <input id="title" type="text" name="title" placeholder="例: 図書館の資料を集める" required maxlength="120">
+                <input id="title" type="text" name="title" placeholder="例: 仕様レビューを終える" required maxlength="120">
               </div>
               <div>
                 <label for="description">詳細説明</label>
-                <textarea id="description" name="description" placeholder="例: 参考文献を3件集める、メモを残す"></textarea>
-              </div>
-              <div class="small-grid">
-                <div>
-                  <label for="category">カテゴリ</label>
-                  <select id="category" name="category">
-                    <option value="study">勉強</option>
-                    <option value="work">仕事</option>
-                    <option value="exercise">運動</option>
-                    <option value="hobby">趣味</option>
-                    <option value="chores">家事</option>
-                    <option value="general" selected>その他</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="priority">優先度</label>
-                  <select id="priority" name="priority">
-                    <option value="1">1 - 最優先</option>
-                    <option value="2" selected>2 - 優先</option>
-                    <option value="3">3 - 通常</option>
-                    <option value="4">4 - 後回し可</option>
-                  </select>
-                </div>
+                <textarea id="description" name="description" placeholder="例: 重要論点を3つに要約して共有"></textarea>
               </div>
               <div>
                 <label for="dueDate">締切日時</label>
@@ -780,69 +641,28 @@
             </form>
           </div>
         </section>
-      </div>
-
-      <div class="stack">
-        <section class="card">
-          <div class="card-inner city-panel">
-            <h2 class="section-title">街のようす</h2>
-            <p class="section-note">完了が増えるほど、家や塔や住民が少しずつ増えていく。</p>
-            <div class="city-scene" aria-label="街のイメージ" data-level="<%= stats.cityLevel %>">
-              <div class="sun"></div>
-              <div class="cloud one"></div>
-              <% if (stats.cityLevel >= 2) { %><div class="cloud two"></div><% } %>
-              <div class="tree one"></div>
-              <% if (stats.completedTasks >= 1) { %><div class="tree two"></div><% } %>
-              <% if (stats.buildings >= 1) { %><div class="house"></div><% } %>
-              <% if (stats.buildings >= 2) { %><div class="tower"></div><% } %>
-              <% for (let i = 2; i < stats.buildings; i++) { %>
-                <div class="city-extra-house" style="left: <%= 220 + (i - 2) * 72 %>px;"></div>
-              <% } %>
-              <% for (let i = 0; i < Math.min(stats.cityPopulation, 5); i++) { %>
-                <div class="city-extra-resident" style="right: <%= 40 + i * 28 %>px;"></div>
-              <% } %>
-              <% if (stats.completedTasks >= 2) { %><div class="resident"></div><% } %>
-              <div class="city-ground"></div>
-            </div>
-            <div class="small-grid">
-              <div class="small-card"><strong><%= stats.cityPopulation %></strong><span>人口</span></div>
-              <div class="small-card"><strong><%= stats.buildings %></strong><span>建物</span></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-inner">
-            <h2 class="section-title">街の資源</h2>
-            <div class="small-grid">
-              <div class="small-card"><strong><%= stats.xp %> XP</strong><span>ユーザーレベル Lv <%= stats.userLevel %></span></div>
-              <div class="small-card"><strong><%= stats.coins %> コイン</strong><span><%= stats.materials %> 資材を獲得</span></div>
-            </div>
-          </div>
-        </section>
 
         <section class="card">
           <div class="card-inner">
             <h2 class="section-title">タスク一覧</h2>
-
-            <% if (tasks.length === 0) { %>
-              <p class="empty">まだタスクがありません。左のフォームから 1 件追加すると、街が動き出す。</p>
+            <% const pendingTasks = tasks.filter((task) => !task.completed); %>
+            <% const completedTasks = tasks.filter((task) => task.completed); %>
+            <% if (pendingTasks.length === 0) { %>
+              <p class="empty">未完了タスクはありません。</p>
             <% } else { %>
-              <ul class="task-list task-grid">
-                <% tasks.forEach(task => { %>
-                  <li class="task <%= task.completed ? 'completed' : '' %>">
-                    <div aria-hidden="true"><%= task.completed ? '✓' : '○' %></div>
+              <ul class="task-list" id="pending-task-list">
+                <% pendingTasks.forEach((task, index) => { %>
+                <li class="task <%= index >= 10 ? ' hidden-task' : '' %>" data-task-group="pending" <%= index >= 10 ? 'hidden' : '' %>>
+                    <div aria-hidden="true">○</div>
                     <div class="task-meta">
                       <p class="task-title"><%= task.title %></p>
                       <% if (task.description) { %>
                         <p class="task-description"><%= task.description %></p>
                       <% } %>
                       <div class="task-badges">
-                        <span class="badge badge-city"><%= task.categoryLabel %></span>
-                        <span class="badge <%= task.priority <= 1 ? 'badge-danger' : task.priority === 2 ? 'badge-warning' : 'badge-safe' %>"><%= task.priorityLabel %></span>
                         <span class="badge badge-safe"><%= task.statusLabel %></span>
                       </div>
-                      <p class="task-status"><%= task.completed ? '完了' : '未完了' %> / 予定 <%= task.plannedMinutes %>分 / 実績 <%= task.actualMinutes %>分 / 進捗 <%= task.progressRate %>%</p>
+
                       <details class="edit-panel">
                         <summary>編集</summary>
                         <form class="edit-form" action="/tasks/<%= task.id %>/edit" method="post">
@@ -854,53 +674,18 @@
                             <label for="edit-description-<%= task.id %>">詳細説明</label>
                             <textarea id="edit-description-<%= task.id %>" name="description"><%= task.description %></textarea>
                           </div>
-                          <div class="small-grid">
-                            <div>
-                              <label for="edit-category-<%= task.id %>">カテゴリ</label>
-                              <select id="edit-category-<%= task.id %>" name="category">
-                                <option value="study" <%= task.category === 'study' ? 'selected' : '' %>>勉強</option>
-                                <option value="work" <%= task.category === 'work' ? 'selected' : '' %>>仕事</option>
-                                <option value="exercise" <%= task.category === 'exercise' ? 'selected' : '' %>>運動</option>
-                                <option value="hobby" <%= task.category === 'hobby' ? 'selected' : '' %>>趣味</option>
-                                <option value="chores" <%= task.category === 'chores' ? 'selected' : '' %>>家事</option>
-                                <option value="general" <%= task.category === 'general' ? 'selected' : '' %>>その他</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label for="edit-priority-<%= task.id %>">優先度</label>
-                              <select id="edit-priority-<%= task.id %>" name="priority">
-                                <option value="1" <%= task.priority === 1 ? 'selected' : '' %>>1 - 最優先</option>
-                                <option value="2" <%= task.priority === 2 ? 'selected' : '' %>>2 - 優先</option>
-                                <option value="3" <%= task.priority === 3 ? 'selected' : '' %>>3 - 通常</option>
-                                <option value="4" <%= task.priority === 4 ? 'selected' : '' %>>4 - 後回し可</option>
-                              </select>
-                            </div>
-                          </div>
                           <div>
                             <label for="edit-dueDate-<%= task.id %>">締切日時</label>
                             <input id="edit-dueDate-<%= task.id %>" type="datetime-local" name="dueDate" value="<%= task.dueDateInput %>">
-                          </div>
-                          <div class="small-grid">
-                            <div>
-                              <label for="edit-progress-<%= task.id %>">進捗率 (%)</label>
-                              <input id="edit-progress-<%= task.id %>" type="number" name="progressRate" min="0" max="100" value="<%= task.progressRate %>">
-                            </div>
-                            <div>
-                              <label for="edit-planned-<%= task.id %>">予定時間 (分)</label>
-                              <input id="edit-planned-<%= task.id %>" type="number" name="plannedMinutes" min="1" max="480" value="<%= task.plannedMinutes %>">
-                            </div>
-                          </div>
-                          <div>
-                            <label for="edit-actual-<%= task.id %>">実績時間 (分)</label>
-                            <input id="edit-actual-<%= task.id %>" type="number" name="actualMinutes" min="0" max="480" value="<%= task.actualMinutes %>">
                           </div>
                           <button class="secondary" type="submit">変更を保存</button>
                         </form>
                       </details>
                     </div>
                     <div class="actions">
-                      <form action="/tasks/<%= task.id %>/toggle" method="post">
-                        <button class="secondary" type="submit"><%= task.completed ? '未完了に戻す' : '完了にする' %></button>
+                      <form action="/tasks/<%= task.id %>/toggle" method="post" class="toggle-form" data-task-id="<%= task.id %>" data-completed="0">
+                        <input type="hidden" name="rewardAction" value="stock">
+                        <button class="secondary" type="submit">完了にする</button>
                       </form>
                       <form action="/tasks/<%= task.id %>/duplicate" method="post">
                         <button class="secondary" type="submit">複製</button>
@@ -912,11 +697,866 @@
                   </li>
                 <% }) %>
               </ul>
+              <% if (pendingTasks.length > 10) { %>
+                <div class="show-all-wrap">
+                  <button id="show-all-pending-tasks" class="secondary" type="button">すべてを表示</button>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="card">
+          <div class="card-inner">
+              <h2 class="section-title">ゲーム</h2>
+            <p class="section-note">操作: ← → 移動 / ↑ 回転 / ↓ ソフトドロップ / Space ハードドロップ</p>
+            <div class="tetris-layout">
+              <div class="board-shell">
+                <canvas id="tetris-board" width="300" height="600" aria-label="テトリス盤面"></canvas>
+                <div id="game-over-banner" class="game-over-banner">GAME OVER</div>
+              </div>
+              <div class="game-side">
+                <div>
+                  <h3 class="section-title" style="margin-bottom:8px;">ミノストック</h3>
+                  <div id="stock-grid" class="stock-grid"></div>
+                </div>
+
+                <div>
+                  <h3 class="section-title" style="margin-bottom:8px;">操作</h3>
+                  <div class="controls-grid">
+                    <button id="spawn-piece" class="primary" type="button">ゲームスタート</button>
+                    <button id="rotate-piece" class="info-btn" type="button">回転</button>
+                    <button id="move-left" class="secondary" type="button">左</button>
+                    <button id="move-right" class="secondary" type="button">右</button>
+                    <button id="soft-drop" class="secondary" type="button">落下</button>
+                    <button id="hard-drop" class="danger" type="button">一気に落下</button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 class="section-title" style="margin-bottom:8px;">統計</h3>
+                  <ul class="stat-list">
+                    <li class="stat-row stat-row-highlight"><span>総獲得ミノ数</span><strong id="stat-total-minos">0</strong></li>
+                    <li class="stat-row"><span>総ライン消去数</span><strong id="stat-total-lines">0</strong></li>
+                    <li class="stat-row"><span>最大コンボ数</span><strong id="stat-max-combo">0</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-inner">
+            <h2 class="section-title">過去のタスク</h2>
+            <% if (completedTasks.length === 0) { %>
+              <p class="empty">完了タスクはまだありません。</p>
+            <% } else { %>
+              <ul class="task-list" id="past-task-list">
+                <% completedTasks.forEach((task, index) => { %>
+                <li class="task completed <%= index >= 10 ? ' hidden-task' : '' %>" data-task-group="past" <%= index >= 10 ? 'hidden' : '' %>>
+                    <div aria-hidden="true">✓</div>
+                    <div class="task-meta">
+                      <p class="task-title"><%= task.title %></p>
+                      <% if (task.description) { %>
+                        <p class="task-description"><%= task.description %></p>
+                      <% } %>
+                      <div class="task-badges">
+                        <span class="badge badge-safe"><%= task.statusLabel %></span>
+                      </div>
+
+                      <details class="edit-panel">
+                        <summary>編集</summary>
+                        <form class="edit-form" action="/tasks/<%= task.id %>/edit" method="post">
+                          <div>
+                            <label for="edit-title-<%= task.id %>">タスク名</label>
+                            <input id="edit-title-<%= task.id %>" type="text" name="title" value="<%= task.title %>" required maxlength="120">
+                          </div>
+                          <div>
+                            <label for="edit-description-<%= task.id %>">詳細説明</label>
+                            <textarea id="edit-description-<%= task.id %>" name="description"><%= task.description %></textarea>
+                          </div>
+                          <div>
+                            <label for="edit-dueDate-<%= task.id %>">締切日時</label>
+                            <input id="edit-dueDate-<%= task.id %>" type="datetime-local" name="dueDate" value="<%= task.dueDateInput %>">
+                          </div>
+                          <button class="secondary" type="submit">変更を保存</button>
+                        </form>
+                      </details>
+                    </div>
+                    <div class="actions">
+                      <form action="/tasks/<%= task.id %>/duplicate" method="post">
+                        <button class="secondary" type="submit">複製</button>
+                      </form>
+                      <form action="/tasks/<%= task.id %>/delete" method="post" onsubmit="return confirm('このタスクを削除しますか？');">
+                        <button class="danger" type="submit">削除</button>
+                      </form>
+                    </div>
+                  </li>
+                <% }) %>
+              </ul>
+              <% if (completedTasks.length > 10) { %>
+                <div class="show-all-wrap">
+                  <button id="show-all-past-tasks" class="secondary" type="button">すべてを表示</button>
+                </div>
+              <% } %>
             <% } %>
           </div>
         </section>
       </div>
     </div>
   </main>
+  <script>
+    (() => {
+      const colors = {
+        I: "#4cc9f0",
+        O: "#ffd166",
+        T: "#c77dff",
+        S: "#80ed99",
+        Z: "#ff6b6b",
+        J: "#4d7cfe",
+        L: "#f7b267",
+        X: "#8b8f98",
+      };
+
+      const shapeDefs = {
+        I: [[1, 1, 1, 1]],
+        O: [[1, 1], [1, 1]],
+        T: [[0, 1, 0], [1, 1, 1]],
+        S: [[0, 1, 1], [1, 1, 0]],
+        Z: [[1, 1, 0], [0, 1, 1]],
+        J: [[1, 0, 0], [1, 1, 1]],
+        L: [[0, 0, 1], [1, 1, 1]],
+      };
+
+      const rewardTable = { 1: 120, 2: 360, 3: 720, 4: 1200 };
+      const boardCanvas = document.getElementById("tetris-board");
+      const ctx = boardCanvas ? boardCanvas.getContext("2d") : null;
+      if (!boardCanvas || !ctx) {
+        return;
+      }
+
+      const cols = 10;
+      const rows = 20;
+      const cell = 30;
+      const maxStock = 2;
+      const storageKey = "taskboard-tetris-v1";
+      const totalAcquiredMinos = Number(<%- JSON.stringify(stats.totalAcquiredMinos) %> || 0);
+      const initialUserLevel = Math.max(1, Number(<%- JSON.stringify(stats.userLevel) %> || 1));
+      const seedPieces = <%- JSON.stringify(tetrisSeedPieces) %>;
+      const deadlineTasks = <%- JSON.stringify(tasks.map((task) => ({
+        id: task.id,
+        completed: task.completed,
+        dueDate: task.dueDate,
+      }))) %>;
+
+      function rotateMatrix(mat) {
+        return mat[0].map((_, i) => mat.map((row) => row[i]).reverse());
+      }
+
+      function cloneBoard(board) {
+        return board.map((row) => row.slice());
+      }
+
+      function createBoard() {
+        return Array.from({ length: rows }, () => Array(cols).fill(null));
+      }
+
+      function defaultState() {
+        const initialStockQueue = seedPieces.slice(0, maxStock).map((piece) => ({
+          token: piece.token,
+          taskId: piece.taskId,
+          type: piece.type,
+          title: piece.title || "",
+        }));
+
+        return {
+          stockQueue: initialStockQueue,
+          board: createBoard(),
+          stats: {
+            displayTotalMinos: totalAcquiredMinos,
+            userLevel: initialUserLevel,
+            totalLines: 0,
+            single: 0,
+            double: 0,
+            triple: 0,
+            tetris: 0,
+            maxCombo: 0,
+            combo: 0,
+            xp: 0,
+            coins: 0,
+            event: "待機中",
+          },
+          deadlineTriggers: {},
+          pendingHazards: 0,
+          gameOver: false,
+          selectedToken: initialStockQueue[0]?.token || null,
+        };
+      }
+
+      function readState() {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (!raw) return defaultState();
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed.board) || parsed.board.length !== rows) return defaultState();
+          const merged = { ...defaultState(), ...parsed, stats: { ...defaultState().stats, ...(parsed.stats || {}) } };
+          merged.stockQueue = Array.isArray(merged.stockQueue)
+            ? merged.stockQueue
+                .filter((token) => Number.isInteger(Number(token?.taskId)) && Number(token.taskId) > 0)
+                .slice(0, maxStock)
+            : [];
+          if (!merged.selectedToken || !merged.stockQueue.some((item) => item.token === merged.selectedToken)) {
+            merged.selectedToken = merged.stockQueue[0]?.token || null;
+          }
+          if (!Number.isFinite(merged.stats.displayTotalMinos)) {
+            merged.stats.displayTotalMinos = totalAcquiredMinos;
+          }
+          if (!Number.isFinite(merged.stats.userLevel) || merged.stats.userLevel < 1) {
+            merged.stats.userLevel = initialUserLevel;
+          }
+          return merged;
+        } catch {
+          return defaultState();
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function setGameOverVisible(isVisible) {
+        const banner = document.getElementById("game-over-banner");
+        if (!banner) return;
+        banner.classList.toggle("visible", Boolean(isVisible));
+      }
+
+      function getAvailableTokens() {
+        if (!Array.isArray(state.stockQueue)) {
+          state.stockQueue = [];
+        }
+        return state.stockQueue.slice(0, maxStock);
+      }
+
+      function getMinoTypeForTask(taskId) {
+        const normalized = Math.abs(Math.trunc(taskId));
+        let mixed = (normalized + 0x9e3779b9) >>> 0;
+        mixed = (mixed ^ (mixed >>> 16)) >>> 0;
+        mixed = Math.imul(mixed, 0x85ebca6b) >>> 0;
+        mixed = (mixed ^ (mixed >>> 13)) >>> 0;
+        mixed = Math.imul(mixed, 0xc2b2ae35) >>> 0;
+        mixed = (mixed ^ (mixed >>> 16)) >>> 0;
+        const types = ["I", "O", "T", "S", "Z", "J", "L"];
+        return types[mixed % types.length];
+      }
+
+      function enqueueStockToken(token) {
+        const queue = getAvailableTokens().filter((item) => item.token !== token.token);
+        queue.push(token);
+        while (queue.length > maxStock) {
+          queue.shift();
+        }
+        state.stockQueue = queue;
+        if (!state.selectedToken || !queue.some((item) => item.token === state.selectedToken)) {
+          state.selectedToken = queue[0]?.token || null;
+        }
+      }
+
+      function popTokenById(tokenId) {
+        const queue = getAvailableTokens();
+        const idx = queue.findIndex((item) => item.token === tokenId);
+        if (idx < 0) return null;
+        const target = queue[idx];
+        queue.splice(idx, 1);
+        state.stockQueue = queue;
+        state.selectedToken = queue[0]?.token || null;
+        saveState();
+        return target;
+      }
+
+      function createActivePiece(type) {
+        const shape = shapeDefs[type].map((row) => row.slice());
+        const candidate = {
+          type,
+          shape,
+          x: Math.floor((cols - shape[0].length) / 2),
+          y: -1,
+          color: null,
+          isHazard: false,
+        };
+        if (collides(candidate.x, candidate.y, candidate.shape)) {
+          return null;
+        }
+        return candidate;
+      }
+
+      function getRandomHazardShape() {
+        const keys = Object.keys(shapeDefs);
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        return shapeDefs[key].map((row) => row.slice());
+      }
+
+      function resetKeyStatsOnTopOut() {
+        state.stats.displayTotalMinos = 0;
+        state.stats.userLevel = 1;
+        state.stats.totalLines = 0;
+        state.stats.maxCombo = 0;
+        state.stats.single = 0;
+        state.stats.double = 0;
+        state.stats.triple = 0;
+        state.stats.tetris = 0;
+        state.stats.combo = 0;
+        state.stats.event = "天井到達で統計をリセットしました";
+      }
+
+      function triggerGameOver() {
+        state.board = createBoard();
+        active = null;
+        state.pendingHazards = 0;
+        state.gameOver = true;
+        resetKeyStatsOnTopOut();
+        setGameOverVisible(true);
+      }
+
+      function isTopReached() {
+        return Array.isArray(state.board[0]) && state.board[0].some(Boolean);
+      }
+
+      function enforceTopOutResetIfNeeded() {
+        if (!isTopReached()) return;
+        triggerGameOver();
+        saveState();
+      }
+
+      function spawnHazardFromTop() {
+        if (active) return false;
+        const shape = getRandomHazardShape();
+        const maxX = cols - shape[0].length;
+        const x = Math.floor(Math.random() * (maxX + 1));
+        const candidate = {
+          type: "X",
+          shape,
+          x,
+          y: -1,
+          color: colors.X,
+          isHazard: true,
+        };
+
+        if (collides(candidate.x, candidate.y, candidate.shape)) {
+          triggerGameOver();
+          saveState();
+          render();
+          return false;
+        }
+
+        active = candidate;
+        render();
+        return true;
+      }
+
+      function trySpawnPendingHazard() {
+        if (active) return;
+        if (!state.pendingHazards || state.pendingHazards <= 0) return;
+        state.pendingHazards -= 1;
+        spawnHazardFromTop();
+        saveState();
+      }
+
+      function queueDeadlineHazard(reasonLabel) {
+        state.pendingHazards = (state.pendingHazards || 0) + 1;
+        state.stats.event = `${reasonLabel}でグレーミノが落下`;
+        trySpawnPendingHazard();
+      }
+
+      function watchDeadlineHazards() {
+        const thresholds = [30, 10, 5];
+
+        const tick = () => {
+          const now = Date.now();
+          for (const task of deadlineTasks) {
+            if (!task || task.completed || !task.dueDate) continue;
+            const dueAt = new Date(task.dueDate).getTime();
+            if (!Number.isFinite(dueAt)) continue;
+            const remainingMs = dueAt - now;
+            if (remainingMs <= 0) continue;
+
+            for (const threshold of thresholds) {
+              const key = `${task.id}-${threshold}`;
+              if (state.deadlineTriggers[key]) continue;
+              if (remainingMs <= threshold * 60 * 1000) {
+                state.deadlineTriggers[key] = true;
+                queueDeadlineHazard(`締切まで${threshold}分`);
+              }
+            }
+          }
+          saveState();
+        };
+
+        tick();
+        window.setInterval(tick, 15000);
+      }
+
+      function applyRewardFromQuery() {
+        const clearRewardQuery = () => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("rewardAction");
+          url.searchParams.delete("rewardTaskId");
+          const clean = `${url.pathname}${url.search}${url.hash}`;
+          window.history.replaceState({}, "", clean || "/");
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const rawTaskId = params.get("rewardTaskId");
+        if (rawTaskId == null) {
+          return;
+        }
+
+        const actionRaw = String(params.get("rewardAction") || "stock").toLowerCase();
+        const action = actionRaw === "start" ? "start" : "stock";
+        const rewardTaskId = Number(rawTaskId);
+        if (!Number.isInteger(rewardTaskId)) {
+          clearRewardQuery();
+          return;
+        }
+
+        const token = {
+          token: `task-${rewardTaskId}`,
+          taskId: rewardTaskId,
+          type: getMinoTypeForTask(rewardTaskId),
+          title: "",
+        };
+
+        if (action === "stock") {
+          enqueueStockToken(token);
+          state.stats.displayTotalMinos += 1;
+          setEvent(`ストック追加: ${token.type}`);
+        } else {
+          const candidate = createActivePiece(token.type);
+          if (candidate) {
+            active = candidate;
+            state.stats.displayTotalMinos += 1;
+            setEvent(`ゲームスタート: ${token.type}`);
+          } else {
+            enqueueStockToken(token);
+            state.stats.displayTotalMinos += 1;
+            setEvent(`盤面が詰まっているため ${token.type} をストックに回しました`);
+          }
+        }
+
+        saveState();
+        clearRewardQuery();
+      }
+
+      function popToken(type) {
+        const selectedTokenId = state.selectedToken;
+        const target = selectedTokenId ? popTokenById(selectedTokenId) : null;
+        if (!target) return null;
+        if (type && target.type !== type) {
+          const fallback = getAvailableTokens().find((item) => item.type === type);
+          if (fallback) {
+            enqueueStockToken(target);
+            return popTokenById(fallback.token);
+          }
+        }
+        return target;
+      }
+
+      function spawn(type) {
+        if (active) return;
+        const token = popToken(type);
+        if (!token) {
+          setEvent("そのミノの在庫がありません");
+          renderStock();
+          return;
+        }
+        const shape = shapeDefs[type].map((row) => row.slice());
+        active = {
+          type,
+          shape,
+          x: Math.floor((cols - shape[0].length) / 2),
+          y: -1,
+          color: null,
+          isHazard: false,
+        };
+        state.gameOver = false;
+        setGameOverVisible(false);
+        if (collides(active.x, active.y, active.shape)) {
+          triggerGameOver();
+          saveState();
+        }
+        render();
+        renderStock();
+      }
+
+      function collides(nx, ny, shape) {
+        for (let y = 0; y < shape.length; y += 1) {
+          for (let x = 0; x < shape[y].length; x += 1) {
+            if (!shape[y][x]) continue;
+            const bx = nx + x;
+            const by = ny + y;
+            if (bx < 0 || bx >= cols || by >= rows) return true;
+            if (by >= 0 && state.board[by][bx]) return true;
+          }
+        }
+        return false;
+      }
+
+      function lockPiece() {
+        if (!active) return;
+        for (let y = 0; y < active.shape.length; y += 1) {
+          for (let x = 0; x < active.shape[y].length; x += 1) {
+            if (!active.shape[y][x]) continue;
+            const by = active.y + y;
+            const bx = active.x + x;
+            if (by >= 0 && by < rows && bx >= 0 && bx < cols) {
+              state.board[by][bx] = active.isHazard ? "X" : active.type;
+            }
+          }
+        }
+
+        if (state.board[0].some(Boolean)) {
+          triggerGameOver();
+        }
+
+        active = null;
+        const cleared = clearLines();
+        if (cleared > 0) {
+          state.stats.combo += 1;
+          state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
+          state.stats.totalLines += cleared;
+          if (cleared === 1) state.stats.single += 1;
+          if (cleared === 2) state.stats.double += 1;
+          if (cleared === 3) state.stats.triple += 1;
+          if (cleared === 4) state.stats.tetris += 1;
+          const base = rewardTable[cleared] || 0;
+          const comboBonus = Math.max(0, state.stats.combo - 1) * 35;
+          state.stats.xp += base + comboBonus;
+          state.stats.coins += Math.floor((base + comboBonus) / 12);
+          const label = cleared === 4 ? "Tetris" : cleared === 3 ? "Triple" : cleared === 2 ? "Double" : "Single";
+          setEvent(`${label}! combo x${state.stats.combo}`);
+          flashBoard();
+          playLineSound(cleared, state.stats.combo);
+        } else {
+          state.stats.combo = 0;
+        }
+        saveState();
+        trySpawnPendingHazard();
+        render();
+        renderStats();
+        renderStock();
+      }
+
+      function clearLines() {
+        const remained = state.board.filter((row) => row.some((cell) => !cell));
+        const removed = rows - remained.length;
+        while (remained.length < rows) {
+          remained.unshift(Array(cols).fill(null));
+        }
+        state.board = remained;
+        return removed;
+      }
+
+      function move(dx, dy, forced = false) {
+        if (!active) return;
+        if (active.isHazard && !forced) return;
+        const nx = active.x + dx;
+        const ny = active.y + dy;
+        if (!collides(nx, ny, active.shape)) {
+          active.x = nx;
+          active.y = ny;
+          render();
+          return;
+        }
+        if (dy === 1) {
+          lockPiece();
+        }
+      }
+
+      function hardDrop() {
+        if (!active) return;
+        if (active.isHazard) return;
+        while (!collides(active.x, active.y + 1, active.shape)) {
+          active.y += 1;
+        }
+        lockPiece();
+      }
+
+      function rotateActive() {
+        if (!active) return;
+        if (active.isHazard) return;
+        const rotated = rotateMatrix(active.shape);
+        if (!collides(active.x, active.y, rotated)) {
+          active.shape = rotated;
+          render();
+          return;
+        }
+        if (!collides(active.x - 1, active.y, rotated)) {
+          active.x -= 1;
+          active.shape = rotated;
+          render();
+          return;
+        }
+        if (!collides(active.x + 1, active.y, rotated)) {
+          active.x += 1;
+          active.shape = rotated;
+          render();
+        }
+      }
+
+      function drawCell(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * cell, y * cell, cell, cell);
+        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x * cell + 0.5, y * cell + 0.5, cell - 1, cell - 1);
+      }
+
+      function renderBoard() {
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--board-bg").trim();
+        ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
+
+        for (let y = 0; y < rows; y += 1) {
+          for (let x = 0; x < cols; x += 1) {
+            const type = state.board[y][x];
+            if (!type) {
+              ctx.fillStyle = "#2b3541";
+              ctx.fillRect(x * cell, y * cell, cell, cell);
+              ctx.strokeStyle = "rgba(0,0,0,0.2)";
+              ctx.strokeRect(x * cell + 0.5, y * cell + 0.5, cell - 1, cell - 1);
+            } else {
+                drawCell(x, y, colors[type] || colors.X);
+            }
+          }
+        }
+
+        if (active) {
+          for (let y = 0; y < active.shape.length; y += 1) {
+            for (let x = 0; x < active.shape[y].length; x += 1) {
+              if (!active.shape[y][x]) continue;
+              const bx = active.x + x;
+              const by = active.y + y;
+              if (by >= 0) drawCell(bx, by, active.color || colors[active.type] || colors.X);
+            }
+          }
+        }
+      }
+
+      function renderStats() {
+        document.getElementById("stat-total-minos").textContent = String(state.stats.displayTotalMinos);
+        document.getElementById("stat-total-lines").textContent = String(state.stats.totalLines);
+        document.getElementById("stat-max-combo").textContent = String(state.stats.maxCombo);
+        const levelEl = document.getElementById("status-user-level");
+        if (levelEl) {
+          levelEl.textContent = `Lv ${Math.max(1, Number(state.stats.userLevel) || 1)}`;
+        }
+      }
+
+      function setEvent(message) {
+        state.stats.event = message;
+      }
+
+      function renderStock() {
+        const queue = getAvailableTokens();
+        const grid = document.getElementById("stock-grid");
+        const spawnButton = document.getElementById("spawn-piece");
+        if (!state.selectedToken || !queue.some((item) => item.token === state.selectedToken)) {
+          state.selectedToken = queue[0]?.token || null;
+        }
+
+        spawnButton.disabled = !state.selectedToken;
+
+        grid.innerHTML = "";
+        if (queue.length === 0) {
+          return;
+        }
+
+        queue.forEach((token, idx) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "stock-item" + (state.selectedToken === token.token ? " active" : "");
+          item.innerHTML = `<strong>${token.type}</strong><span>${idx + 1} 番目のストック</span>`;
+          item.addEventListener("click", () => {
+            state.selectedToken = token.token;
+            saveState();
+            renderStock();
+          });
+          grid.appendChild(item);
+        });
+      }
+
+      function wireToggleChoiceFlow() {
+        const forms = document.querySelectorAll("form.toggle-form");
+        forms.forEach((form) => {
+          const hidden = form.querySelector('input[name="rewardAction"]');
+          if (!hidden) {
+            return;
+          }
+
+          form.addEventListener("submit", (event) => {
+            const isCompleted = form.dataset.completed === "1";
+            if (isCompleted) {
+              hidden.value = "stock";
+              return;
+            }
+            hidden.value = "stock";
+          });
+        });
+      }
+
+      function migrateLegacyState() {
+        if (Array.isArray(state.stockQueue)) {
+          return;
+        }
+
+        const legacyTokens = seedPieces.filter((piece) => !Array.isArray(state.consumedTokens) || !state.consumedTokens.includes(piece.token));
+        state.stockQueue = legacyTokens.slice(0, maxStock).map((piece) => ({
+          token: piece.token,
+          taskId: piece.taskId,
+          type: piece.type,
+          title: piece.title || "",
+        }));
+        state.selectedToken = state.stockQueue[0]?.token || null;
+        saveState();
+      }
+
+      function flashBoard() {
+        boardCanvas.classList.remove("flash");
+        boardCanvas.offsetWidth;
+        boardCanvas.classList.add("flash");
+      }
+
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      function beep(freq, time, gain) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const amp = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.value = freq;
+        amp.gain.value = gain;
+        osc.connect(amp);
+        amp.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + time);
+      }
+
+      function playLineSound(lines, combo) {
+        ensureAudio();
+        if (!audioCtx) return;
+        const base = [220, 330, 440, 660][Math.min(lines - 1, 3)] || 220;
+        beep(base, 0.08, 0.03);
+        beep(base * 1.5, 0.08, 0.02);
+        if (combo >= 2) {
+          beep(base * 2, 0.12, 0.03);
+        }
+      }
+
+      function computeHint() {
+        const board = cloneBoard(state.board);
+        let near = 0;
+        for (const row of board) {
+          const filled = row.filter(Boolean).length;
+          if (filled === cols - 1) near += 1;
+        }
+        if (near > 0) {
+          return `あと ${near} 箇所で1列揃いそうです。`; 
+        }
+        const stock = getAvailableTokens().length;
+        if (stock === 0) {
+          return "ミノ在庫がありません。タスク完了で補充しましょう。";
+        }
+        const selected = getAvailableTokens().find((token) => token.token === state.selectedToken);
+        return `在庫ミノ ${stock} 個。次は ${selected?.type || "任意"} ミノで形を作るのがおすすめです。`;
+      }
+
+      function render() {
+        renderBoard();
+        renderStats();
+        setGameOverVisible(state.gameOver);
+      }
+
+      function wireTaskListLimit() {
+        const wireGroup = (groupName, buttonId) => {
+          const items = Array.from(document.querySelectorAll(`[data-task-group='${groupName}']`));
+          if (items.length <= 10) return;
+          const showAllButton = document.getElementById(buttonId);
+          if (!showAllButton) return;
+
+          showAllButton.addEventListener("click", () => {
+            items.forEach((item) => {
+              item.classList.remove("hidden-task");
+              item.hidden = false;
+            });
+            showAllButton.remove();
+          });
+        };
+
+        wireGroup("pending", "show-all-pending-tasks");
+        wireGroup("past", "show-all-past-tasks");
+      }
+
+      const state = readState();
+      let active = null;
+      let lastDrop = 0;
+      let dropInterval = 700;
+
+      migrateLegacyState();
+      applyRewardFromQuery();
+      enforceTopOutResetIfNeeded();
+      wireToggleChoiceFlow();
+      wireTaskListLimit();
+      watchDeadlineHazards();
+
+      function gameLoop(ts) {
+        if (!lastDrop) lastDrop = ts;
+        const delta = ts - lastDrop;
+        if (active && delta > dropInterval) {
+          move(0, 1, true);
+          lastDrop = ts;
+        }
+        requestAnimationFrame(gameLoop);
+      }
+
+      document.getElementById("spawn-piece").addEventListener("click", () => {
+        ensureAudio();
+        const selected = getAvailableTokens().find((token) => token.token === state.selectedToken);
+        if (!selected) {
+          setEvent("在庫ミノがありません");
+          renderStats();
+          return;
+        }
+        spawn(selected.type);
+      });
+      document.getElementById("rotate-piece").addEventListener("click", () => { ensureAudio(); rotateActive(); });
+      document.getElementById("move-left").addEventListener("click", () => { ensureAudio(); move(-1, 0); });
+      document.getElementById("move-right").addEventListener("click", () => { ensureAudio(); move(1, 0); });
+      document.getElementById("soft-drop").addEventListener("click", () => { ensureAudio(); move(0, 1); });
+      document.getElementById("hard-drop").addEventListener("click", () => { ensureAudio(); hardDrop(); });
+
+      window.addEventListener("keydown", (event) => {
+        if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(event.key)) {
+          event.preventDefault();
+          ensureAudio();
+        }
+
+        if (event.key === "ArrowLeft") move(-1, 0);
+        else if (event.key === "ArrowRight") move(1, 0);
+        else if (event.key === "ArrowDown") move(0, 1);
+        else if (event.key === "ArrowUp") rotateActive();
+        else if (event.key === " ") hardDrop();
+      }, { passive: false });
+
+      renderStock();
+      render();
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
 </body>
 </html>

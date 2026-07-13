@@ -2,9 +2,6 @@ export type TaskViewModel = {
   id: number;
   title: string;
   description: string;
-  category: string;
-  categoryLabel: string;
-  priority: number;
   completed: boolean;
   dueDate: Date | null;
   createdAt: Date;
@@ -14,7 +11,6 @@ export type TaskViewModel = {
   xpReward: number;
   coinReward: number;
   materialReward: number;
-  priorityLabel: string;
   statusLabel: string;
 };
 
@@ -22,46 +18,85 @@ export type DashboardStats = {
   totalTasks: number;
   completedTasks: number;
   completionRate: number;
-  streakDays: number;
   userLevel: number;
-  cityLevel: number;
-  cityPopulation: number;
-  buildings: number;
   xp: number;
   coins: number;
   materials: number;
+  totalAcquiredMinos: number;
   nextTaskTitle: string;
   morningNote: string;
   nightNote: string;
+  tetrisHint: string;
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  study: "勉強",
-  work: "仕事",
-  exercise: "運動",
-  hobby: "趣味",
-  chores: "家事",
-  general: "その他",
+export type MinoType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
+
+export type CompletedMinoToken = {
+  token: string;
+  taskId: number;
+  type: MinoType;
+  title: string;
 };
 
-export function getCategoryLabel(category: string): string {
-  return CATEGORY_LABELS[category] ?? category;
+export type MinoStockSummary = {
+  total: number;
+  counts: Record<MinoType, number>;
+  tokens: CompletedMinoToken[];
+};
+
+const MINO_TYPES: MinoType[] = ["I", "O", "T", "S", "Z", "J", "L"];
+
+const EMPTY_MINO_COUNTS: Record<MinoType, number> = {
+  I: 0,
+  O: 0,
+  T: 0,
+  S: 0,
+  Z: 0,
+  J: 0,
+  L: 0,
+};
+
+export function getMinoTypeForTask(taskId: number): MinoType {
+  const normalized = Math.abs(Math.trunc(taskId));
+  let mixed = (normalized + 0x9e3779b9) >>> 0;
+  mixed = (mixed ^ (mixed >>> 16)) >>> 0;
+  mixed = Math.imul(mixed, 0x85ebca6b) >>> 0;
+  mixed = (mixed ^ (mixed >>> 13)) >>> 0;
+  mixed = Math.imul(mixed, 0xc2b2ae35) >>> 0;
+  mixed = (mixed ^ (mixed >>> 16)) >>> 0;
+  return MINO_TYPES[mixed % MINO_TYPES.length];
 }
 
-export function calculatePriorityLabel(priority: number): string {
-  if (priority <= 1) return "最優先";
-  if (priority === 2) return "優先";
-  if (priority === 3) return "通常";
-  return "後回し可";
+export function buildMinoStockSummary(tasks: TaskViewModel[]): MinoStockSummary {
+  const counts: Record<MinoType, number> = { ...EMPTY_MINO_COUNTS };
+  const tokens: CompletedMinoToken[] = [];
+
+  for (const task of tasks) {
+    if (!task.completed) continue;
+    const type = getMinoTypeForTask(task.id);
+    counts[type] += 1;
+    tokens.push({
+      token: `task-${task.id}`,
+      taskId: task.id,
+      type,
+      title: task.title,
+    });
+  }
+
+  return {
+    total: tokens.length,
+    counts,
+    tokens,
+  };
 }
 
-export function calculateStatusLabel(task: { completed: boolean; dueDate: Date | null; priority: number }): string {
+export function calculateStatusLabel(task: { completed: boolean; dueDate: Date | null }): string {
   if (task.completed) {
     return "完了済み";
   }
 
   if (!task.dueDate) {
-    return task.priority <= 2 ? "締切未設定 / 早めに着手" : "締切未設定";
+    return "締切未設定";
   }
 
   const now = Date.now();
@@ -76,29 +111,33 @@ export function calculateStatusLabel(task: { completed: boolean; dueDate: Date |
 }
 
 export function buildDashboardStats(tasks: TaskViewModel[]): DashboardStats {
+  const minoStock = buildMinoStockSummary(tasks);
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
   const xp = tasks.reduce((sum, task) => sum + (task.completed ? task.xpReward : 0), 0);
   const coins = tasks.reduce((sum, task) => sum + (task.completed ? task.coinReward : 0), 0);
   const materials = tasks.reduce((sum, task) => sum + (task.completed ? task.materialReward : 0), 0);
-  const cityLevel = Math.max(1, Math.floor(completedTasks / 3) + 1);
   const userLevel = Math.max(1, Math.floor(xp / 30) + 1);
+  const remainingTasks = Math.max(0, totalTasks - completedTasks);
+  const tetrisHint = completedTasks === 0
+    ? "最初の1件を完了したら「ゲームスタート」を押して、獲得ミノを配置しましょう。"
+    : remainingTasks === 0
+      ? `獲得ミノ ${minoStock.total} 個。ストック上限は2個なので、盤面で使って回転させましょう。`
+      : `タスク完了後は「ゲームスタート」で即配置。ストック上限2個を超えないうちに消化するのがおすすめです。`;
 
   return {
     totalTasks,
     completedTasks,
     completionRate,
-    streakDays: completedTasks === 0 ? 0 : Math.max(1, Math.min(30, completedTasks + 2)),
     userLevel,
-    cityLevel,
-    cityPopulation: 10 + completedTasks * 4,
-    buildings: Math.max(1, Math.floor(completedTasks / 2) + 1),
     xp,
     coins,
     materials,
+    totalAcquiredMinos: minoStock.total,
     nextTaskTitle: tasks.find((task) => !task.completed)?.title ?? "今は休憩して次の行動を待つ",
-    morningNote: tasks.length === 0 ? "まずは1件追加して、街の一日を始めよう。" : "最優先の1件を先に終わらせると、街の成長が一気に進む。",
-    nightNote: completedTasks === 0 ? "今日はまだ動き出し前。明日は1件だけでも進めると流れが作りやすい。" : `今日は ${completedTasks} 件進んだ。明日は ${Math.max(0, totalTasks - completedTasks)} 件に集中しよう。`,
+    morningNote: tasks.length === 0 ? "まずは1件追加して、最初のミノを取りに行こう。" : "1件片付けたら、すぐゲームスタートでミノを配置しよう。",
+    nightNote: completedTasks === 0 ? "今日はまだ準備段階。1件終えれば盤面が動き始める。" : `今日は ${completedTasks} 件進んだ。未完了は ${remainingTasks} 件。ミノ在庫を使ってライン消去を狙おう。`,
+    tetrisHint,
   };
 }

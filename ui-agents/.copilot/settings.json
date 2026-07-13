@@ -1,8 +1,0 @@
-{
-  "version": "1.0",
-  "platform": "GitHub Copilot",
-  "description": "GitHub Copilot configuration for UI Agents prompts",
-  "promptFormat": "markdown",
-  "supported_models": ["gpt-4", "gpt-4-turbo", "gpt-35-turbo"],
-  "notes": "These prompts are optimized for GitHub Copilot Chat in VS Code"
-}
