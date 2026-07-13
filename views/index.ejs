@@ -2,20 +2,921 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ユーザー一覧</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Board</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5efe3;
+      --bg-2: #e6dcc6;
+      --panel: rgba(255, 255, 255, 0.84);
+      --panel-strong: #fffdf8;
+      --text: #20252b;
+      --muted: #66707a;
+      --line: #d6cab5;
+      --brand: #0f766e;
+      --brand-strong: #115e59;
+      --sky: #7db8d9;
+      --sun: #f6b74a;
+      --grass: #8bb36d;
+      --stone: #786d61;
+      --danger: #b42318;
+      --shadow: 0 18px 50px rgba(31, 35, 40, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(125, 184, 217, 0.38), transparent 32%),
+        radial-gradient(circle at top right, rgba(246, 183, 74, 0.28), transparent 26%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      color: var(--brand-strong);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      max-width: 12ch;
+    }
+
+    .summary {
+      margin: 0;
+      max-width: 58ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .status-chip {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(214, 202, 181, 0.9);
+      box-shadow: 0 10px 24px rgba(31, 35, 40, 0.06);
+    }
+
+    .status-chip strong {
+      display: block;
+      font-size: 1.35rem;
+      letter-spacing: -0.04em;
+    }
+
+    .status-chip span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 202, 184, 0.8);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-inner {
+      padding: 22px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-note {
+      margin: -6px 0 14px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-strong);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-strong);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-strong);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    }
+
+    input[type="datetime-local"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-strong);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="datetime-local"]:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    }
+
+    .primary {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      padding: 13px 18px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 12px 24px rgba(15, 118, 110, 0.24);
+    }
+
+    .primary:hover {
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+    }
+
+    .primary:active,
+    .secondary:active,
+    .danger:active {
+      transform: translateY(0);
+    }
+
+    .card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .task {
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .task:not(.completed):hover {
+      border-color: rgba(15, 118, 110, 0.35);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .secondary:hover,
+    .danger:hover {
+      border-color: var(--brand);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .task-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(212, 202, 184, 0.9);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .task.completed .task-title {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .task-meta {
+      display: grid;
+      gap: 4px;
+    }
+
+    .task-grid .task-meta {
+      gap: 8px;
+    }
+
+    .task-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      border: 1px solid transparent;
+    }
+
+    .badge-danger {
+      background: rgba(180, 35, 24, 0.12);
+      color: #8f1d16;
+      border-color: rgba(180, 35, 24, 0.18);
+    }
+
+    .badge-warning {
+      background: rgba(220, 124, 0, 0.12);
+      color: #9a5200;
+      border-color: rgba(220, 124, 0, 0.18);
+    }
+
+    .badge-safe {
+      background: rgba(15, 118, 110, 0.12);
+      color: #115e59;
+      border-color: rgba(15, 118, 110, 0.18);
+    }
+
+    .badge-city {
+      background: rgba(120, 109, 97, 0.12);
+      color: var(--stone);
+      border-color: rgba(120, 109, 97, 0.18);
+    }
+
+    .task-title {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .task-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .task-description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.65;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .secondary,
+    .danger {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: white;
+      color: var(--text);
+      font: inherit;
+      font-weight: 600;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    .edit-panel {
+      margin-top: 10px;
+      border-top: 1px dashed var(--line);
+      padding-top: 12px;
+    }
+
+    .edit-panel summary {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--brand-strong);
+      list-style: none;
+    }
+
+    .edit-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .edit-form {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .city-scene[data-level="1"] { filter: saturate(0.85); }
+    .city-scene[data-level="2"] { filter: saturate(0.95); }
+    .city-scene[data-level="3"],
+    .city-scene[data-level="4"],
+    .city-scene[data-level="5"] { filter: saturate(1.05) brightness(1.02); }
+
+    .city-extra-house,
+    .city-extra-tower,
+    .city-extra-resident {
+      position: absolute;
+      bottom: 48px;
+    }
+
+    .city-extra-house {
+      width: 64px;
+      height: 48px;
+      border-radius: 10px 10px 6px 6px;
+      background: linear-gradient(180deg, #d9b48c, #b78858);
+    }
+
+    .city-extra-tower {
+      width: 40px;
+      height: 72px;
+      border-radius: 12px 12px 6px 6px;
+      background: linear-gradient(180deg, #9db2c4, #66788a);
+    }
+
+    .city-extra-resident {
+      width: 22px;
+      height: 36px;
+      bottom: 40px;
+      border-radius: 10px 10px 8px 8px;
+      background: linear-gradient(180deg, #f1d5b8, #d9a27a);
+    }
+
+    .empty {
+      margin: 0;
+      padding: 28px 20px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .city-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .city-scene {
+      position: relative;
+      min-height: 220px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(214, 202, 181, 0.9);
+      background:
+        linear-gradient(180deg, rgba(125, 184, 217, 0.45), rgba(255, 255, 255, 0.1)),
+        linear-gradient(180deg, #f7e7b5 0 42%, #aacb88 42% 100%);
+    }
+
+    .sun {
+      position: absolute;
+      right: 28px;
+      top: 24px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff7d6 0%, var(--sun) 70%);
+      box-shadow: 0 0 38px rgba(246, 183, 74, 0.44);
+    }
+
+    .cloud {
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      filter: blur(0.2px);
+    }
+
+    .cloud.one { width: 100px; height: 28px; top: 34px; left: 24px; }
+    .cloud.two { width: 120px; height: 34px; top: 62px; left: 140px; }
+
+    .city-ground {
+      position: absolute;
+      inset: auto 0 0;
+      height: 94px;
+      background: linear-gradient(180deg, rgba(139, 179, 109, 0.95), #73965b);
+    }
+
+    .tree {
+      position: absolute;
+      bottom: 52px;
+      width: 20px;
+      height: 42px;
+      background: linear-gradient(180deg, #8c5b36, #5f3a1f);
+      border-radius: 8px;
+    }
+
+    .tree::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      width: 38px;
+      height: 38px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #b7d68b 0%, #7ea552 70%);
+    }
+
+    .tree.one { left: 26px; }
+    .tree.two { left: 88px; bottom: 48px; }
+
+    .house {
+      position: absolute;
+      left: 152px;
+      bottom: 48px;
+      width: 86px;
+      height: 64px;
+      border-radius: 12px 12px 8px 8px;
+      background: linear-gradient(180deg, #d9b48c, #b78858);
+      box-shadow: inset 0 -8px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .house::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -28px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 52px solid transparent;
+      border-right: 52px solid transparent;
+      border-bottom: 30px solid #9a5f37;
+    }
+
+    .house::after {
+      content: "";
+      position: absolute;
+      left: 34px;
+      bottom: 0;
+      width: 18px;
+      height: 24px;
+      background: #fff4d9;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 18px 0 0 #f3e2b7;
+    }
+
+    .tower {
+      position: absolute;
+      left: 270px;
+      bottom: 48px;
+      width: 52px;
+      height: 96px;
+      border-radius: 14px 14px 8px 8px;
+      background: linear-gradient(180deg, #9db2c4, #66788a);
+    }
+
+    .tower::before {
+      content: "";
+      position: absolute;
+      inset: 14px 10px 12px;
+      border-radius: 10px;
+      background: repeating-linear-gradient(180deg, rgba(255,255,255,0.8) 0 10px, rgba(255,255,255,0.25) 10px 18px);
+    }
+
+    .resident {
+      position: absolute;
+      right: 84px;
+      bottom: 40px;
+      width: 26px;
+      height: 42px;
+      border-radius: 12px 12px 10px 10px;
+      background: linear-gradient(180deg, #f1d5b8, #d9a27a);
+    }
+
+    .resident::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -16px;
+      width: 20px;
+      height: 20px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: #f2caa9;
+    }
+
+    .note-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .note-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(214, 202, 181, 0.9);
+    }
+
+    .note-card strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .note-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .small-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .small-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(214, 202, 181, 0.9);
+    }
+
+    .small-card strong {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .small-card span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 860px) {
+      .status-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 18px 14px 40px;
+      }
+
+      .card-inner {
+        padding: 18px;
+      }
+
+      .status-bar,
+      .small-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task {
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .actions form,
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>ユーザー一覧</h1>
-  <ul>
-  <% users.forEach(user => { %>
-    <li><%= user.name %>（<%= user.age ? user.age + '歳' : '年齢未設定' %>）</li>
-  <% }) %>
-</ul>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">City Secretary / Task Board</p>
+      <h1>街を育てるために、今日の1件を終わらせる。</h1>
+      <p class="summary">AI秘書が、その日の最初の一歩を示す。タスクを終えるたびに、街が少しずつ明るくなっていくダッシュボード。</p>
+      <div class="status-bar" aria-label="主要ステータス">
+        <div class="status-chip"><strong><%= stats.totalTasks %></strong><span>総タスク数</span></div>
+        <div class="status-chip"><strong><%= stats.completionRate %>%</strong><span>完了率</span></div>
+        <div class="status-chip"><strong><%= stats.streakDays %>日</strong><span>ストリーク</span></div>
+        <div class="status-chip"><strong>Lv <%= stats.cityLevel %></strong><span>街レベル</span></div>
+      </div>
+    </header>
 
-<form action="/users" method="post">
-  <input type="text" name="name" placeholder="名前" required>
-  <input type="number" name="age" placeholder="年齢">
-  <button type="submit">追加</button>
-</form>
+    <div class="grid">
+      <div class="stack">
+        <section class="card">
+          <div class="card-inner">
+            <h2 class="section-title">今日のおすすめ</h2>
+            <p class="section-note"><%= stats.morningNote %></p>
+            <div class="note-grid">
+              <div class="note-card">
+                <strong>次にやること</strong>
+                <p><%= stats.nextTaskTitle %></p>
+              </div>
+              <div class="note-card">
+                <strong>夜の振り返り</strong>
+                <p><%= stats.nightNote %></p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-inner">
+            <h2 class="section-title">新しいタスク</h2>
+            <p class="section-note">追加した瞬間に街の進行対象になる。まずは1件、気軽に入れていい。</p>
+            <form action="/tasks" method="post">
+              <div>
+                <label for="title">タスク名</label>
+                <input id="title" type="text" name="title" placeholder="例: 図書館の資料を集める" required maxlength="120">
+              </div>
+              <div>
+                <label for="description">詳細説明</label>
+                <textarea id="description" name="description" placeholder="例: 参考文献を3件集める、メモを残す"></textarea>
+              </div>
+              <div class="small-grid">
+                <div>
+                  <label for="category">カテゴリ</label>
+                  <select id="category" name="category">
+                    <option value="study">勉強</option>
+                    <option value="work">仕事</option>
+                    <option value="exercise">運動</option>
+                    <option value="hobby">趣味</option>
+                    <option value="chores">家事</option>
+                    <option value="general" selected>その他</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="priority">優先度</label>
+                  <select id="priority" name="priority">
+                    <option value="1">1 - 最優先</option>
+                    <option value="2" selected>2 - 優先</option>
+                    <option value="3">3 - 通常</option>
+                    <option value="4">4 - 後回し可</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label for="dueDate">締切日時</label>
+                <input id="dueDate" type="datetime-local" name="dueDate">
+              </div>
+              <button class="primary" type="submit">タスクを追加</button>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="card">
+          <div class="card-inner city-panel">
+            <h2 class="section-title">街のようす</h2>
+            <p class="section-note">完了が増えるほど、家や塔や住民が少しずつ増えていく。</p>
+            <div class="city-scene" aria-label="街のイメージ" data-level="<%= stats.cityLevel %>">
+              <div class="sun"></div>
+              <div class="cloud one"></div>
+              <% if (stats.cityLevel >= 2) { %><div class="cloud two"></div><% } %>
+              <div class="tree one"></div>
+              <% if (stats.completedTasks >= 1) { %><div class="tree two"></div><% } %>
+              <% if (stats.buildings >= 1) { %><div class="house"></div><% } %>
+              <% if (stats.buildings >= 2) { %><div class="tower"></div><% } %>
+              <% for (let i = 2; i < stats.buildings; i++) { %>
+                <div class="city-extra-house" style="left: <%= 220 + (i - 2) * 72 %>px;"></div>
+              <% } %>
+              <% for (let i = 0; i < Math.min(stats.cityPopulation, 5); i++) { %>
+                <div class="city-extra-resident" style="right: <%= 40 + i * 28 %>px;"></div>
+              <% } %>
+              <% if (stats.completedTasks >= 2) { %><div class="resident"></div><% } %>
+              <div class="city-ground"></div>
+            </div>
+            <div class="small-grid">
+              <div class="small-card"><strong><%= stats.cityPopulation %></strong><span>人口</span></div>
+              <div class="small-card"><strong><%= stats.buildings %></strong><span>建物</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-inner">
+            <h2 class="section-title">街の資源</h2>
+            <div class="small-grid">
+              <div class="small-card"><strong><%= stats.xp %> XP</strong><span>ユーザーレベル Lv <%= stats.userLevel %></span></div>
+              <div class="small-card"><strong><%= stats.coins %> コイン</strong><span><%= stats.materials %> 資材を獲得</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-inner">
+            <h2 class="section-title">タスク一覧</h2>
+
+            <% if (tasks.length === 0) { %>
+              <p class="empty">まだタスクがありません。左のフォームから 1 件追加すると、街が動き出す。</p>
+            <% } else { %>
+              <ul class="task-list task-grid">
+                <% tasks.forEach(task => { %>
+                  <li class="task <%= task.completed ? 'completed' : '' %>">
+                    <div aria-hidden="true"><%= task.completed ? '✓' : '○' %></div>
+                    <div class="task-meta">
+                      <p class="task-title"><%= task.title %></p>
+                      <% if (task.description) { %>
+                        <p class="task-description"><%= task.description %></p>
+                      <% } %>
+                      <div class="task-badges">
+                        <span class="badge badge-city"><%= task.categoryLabel %></span>
+                        <span class="badge <%= task.priority <= 1 ? 'badge-danger' : task.priority === 2 ? 'badge-warning' : 'badge-safe' %>"><%= task.priorityLabel %></span>
+                        <span class="badge badge-safe"><%= task.statusLabel %></span>
+                      </div>
+                      <p class="task-status"><%= task.completed ? '完了' : '未完了' %> / 予定 <%= task.plannedMinutes %>分 / 実績 <%= task.actualMinutes %>分 / 進捗 <%= task.progressRate %>%</p>
+                      <details class="edit-panel">
+                        <summary>編集</summary>
+                        <form class="edit-form" action="/tasks/<%= task.id %>/edit" method="post">
+                          <div>
+                            <label for="edit-title-<%= task.id %>">タスク名</label>
+                            <input id="edit-title-<%= task.id %>" type="text" name="title" value="<%= task.title %>" required maxlength="120">
+                          </div>
+                          <div>
+                            <label for="edit-description-<%= task.id %>">詳細説明</label>
+                            <textarea id="edit-description-<%= task.id %>" name="description"><%= task.description %></textarea>
+                          </div>
+                          <div class="small-grid">
+                            <div>
+                              <label for="edit-category-<%= task.id %>">カテゴリ</label>
+                              <select id="edit-category-<%= task.id %>" name="category">
+                                <option value="study" <%= task.category === 'study' ? 'selected' : '' %>>勉強</option>
+                                <option value="work" <%= task.category === 'work' ? 'selected' : '' %>>仕事</option>
+                                <option value="exercise" <%= task.category === 'exercise' ? 'selected' : '' %>>運動</option>
+                                <option value="hobby" <%= task.category === 'hobby' ? 'selected' : '' %>>趣味</option>
+                                <option value="chores" <%= task.category === 'chores' ? 'selected' : '' %>>家事</option>
+                                <option value="general" <%= task.category === 'general' ? 'selected' : '' %>>その他</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label for="edit-priority-<%= task.id %>">優先度</label>
+                              <select id="edit-priority-<%= task.id %>" name="priority">
+                                <option value="1" <%= task.priority === 1 ? 'selected' : '' %>>1 - 最優先</option>
+                                <option value="2" <%= task.priority === 2 ? 'selected' : '' %>>2 - 優先</option>
+                                <option value="3" <%= task.priority === 3 ? 'selected' : '' %>>3 - 通常</option>
+                                <option value="4" <%= task.priority === 4 ? 'selected' : '' %>>4 - 後回し可</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label for="edit-dueDate-<%= task.id %>">締切日時</label>
+                            <input id="edit-dueDate-<%= task.id %>" type="datetime-local" name="dueDate" value="<%= task.dueDateInput %>">
+                          </div>
+                          <div class="small-grid">
+                            <div>
+                              <label for="edit-progress-<%= task.id %>">進捗率 (%)</label>
+                              <input id="edit-progress-<%= task.id %>" type="number" name="progressRate" min="0" max="100" value="<%= task.progressRate %>">
+                            </div>
+                            <div>
+                              <label for="edit-planned-<%= task.id %>">予定時間 (分)</label>
+                              <input id="edit-planned-<%= task.id %>" type="number" name="plannedMinutes" min="1" max="480" value="<%= task.plannedMinutes %>">
+                            </div>
+                          </div>
+                          <div>
+                            <label for="edit-actual-<%= task.id %>">実績時間 (分)</label>
+                            <input id="edit-actual-<%= task.id %>" type="number" name="actualMinutes" min="0" max="480" value="<%= task.actualMinutes %>">
+                          </div>
+                          <button class="secondary" type="submit">変更を保存</button>
+                        </form>
+                      </details>
+                    </div>
+                    <div class="actions">
+                      <form action="/tasks/<%= task.id %>/toggle" method="post">
+                        <button class="secondary" type="submit"><%= task.completed ? '未完了に戻す' : '完了にする' %></button>
+                      </form>
+                      <form action="/tasks/<%= task.id %>/duplicate" method="post">
+                        <button class="secondary" type="submit">複製</button>
+                      </form>
+                      <form action="/tasks/<%= task.id %>/delete" method="post" onsubmit="return confirm('このタスクを削除しますか？');">
+                        <button class="danger" type="submit">削除</button>
+                      </form>
+                    </div>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
 </body>
 </html>
