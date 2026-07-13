@@ -1,0 +1,45 @@
+---
+description: マージ前のコードレビュー・品質チェック
+alwaysApply: false
+---
+
+# Review: コードレビュー
+
+**必読:** `skills/code-review-and-quality/SKILL.md` を全文読み、手順どおりに実行する。
+
+## トリガー
+
+- PR マージ前
+- 機能実装完了後
+- 他のエージェント・モデルが書いたコードの評価
+- 「/review 相当」と依頼された、または `/review` コマンドが実行された
+
+## 5軸レビュー
+
+1. **正しさ** — 仕様通りか、エッジケース・エラーパスはあるか
+2. **可読性** — 説明なしで理解できるか、過剰な複雑さはないか
+3. **アーキテクチャ** — 既存パターンに沿っているか、境界は明確か
+4. **セキュリティ** — 入力検証、認可、秘密情報の扱い
+5. **パフォーマンス** — 明らかなボトルネック、不要な処理
+
+## 深刻度ラベル
+
+- **Nit** — 好みの問題、ブロックしない
+- **Optional** — 改善提案
+- **FYI** — 情報共有
+- **Must fix** — マージ前に修正必須
+
+## 専門レビューが必要な場合
+
+`agents/` のペルソナを読み込んで依頼する:
+
+- `agents/code-reviewer.md` — 総合レビュー
+- `agents/security-auditor.md` — セキュリティ監査
+- `agents/test-engineer.md` — テスト戦略
+- `agents/web-performance-auditor.md` — Web パフォーマンス
+
+## 関連スキル
+
+- 複雑すぎる: `skills/code-simplification/SKILL.md`
+- セキュリティ重点: `skills/security-and-hardening/SKILL.md` + `references/security-checklist.md`
+- 性能重点: `skills/performance-optimization/SKILL.md` + `references/performance-checklist.md`

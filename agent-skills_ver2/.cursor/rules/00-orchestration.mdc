@@ -1,0 +1,62 @@
+---
+description: agent-skills のオーケストレーション。タスクに応じて正しいスキルを選び、手順を厳守する
+alwaysApply: true
+---
+
+# Agent Skills オーケストレーション
+
+このプロジェクトは AI エージェント向けのエンジニアリングスキル集です。作業開始前に、該当スキルがあれば **必ず** `skills/<skill-name>/SKILL.md` を読み、手順を省略せずに従ってください。
+
+## ライフサイクル（スラッシュコマンド）
+
+Agent チャットで `/` を入力し、`.cursor/commands/` のコマンドを使う。Claude Code と同じ名前で動作する。
+
+| コマンド | 読むスキル |
+|---------|-----------|
+| `/spec` | `skills/spec-driven-development/SKILL.md` |
+| `/plan` | `skills/planning-and-task-breakdown/SKILL.md` |
+| `/build` | `incremental-implementation` + `test-driven-development` |
+| `/build auto` | 上記 + `planning-and-task-breakdown`（全タスク自律実行） |
+| `/test` | `skills/test-driven-development/SKILL.md` |
+| `/review` | `skills/code-review-and-quality/SKILL.md` |
+| `/code-simplify` | `skills/code-simplification/SKILL.md` |
+| `/ship` | `skills/shipping-and-launch/SKILL.md` + `agents/*` |
+| `/webperf` | `agents/web-performance-auditor.md` |
+
+コマンドが使えない場合は「`.cursor/commands/spec.md` に従って」と明示してもよい。
+
+## タスク → スキル対応
+
+```
+要件が曖昧 ──────────────→ interview-me / idea-refine
+新機能・仕様なし ─────────→ spec-driven-development
+仕様あり・タスクなし ─────→ planning-and-task-breakdown
+コード実装 ──────────────→ incremental-implementation
+  ├ UI ─────────────────→ frontend-ui-engineering
+  ├ API ────────────────→ api-and-interface-design
+  ├ 公式ドキュメント準拠 → source-driven-development
+  └ 高リスク・不慣れな領域 → doubt-driven-development
+テスト・バグ修正 ─────────→ test-driven-development
+ブラウザ検証 ─────────────→ browser-testing-with-devtools
+障害・失敗 ──────────────→ debugging-and-error-recovery
+マージ前 ────────────────→ code-review-and-quality
+セキュリティ ─────────────→ security-and-hardening
+パフォーマンス ───────────→ performance-optimization
+コミット・ブランチ ───────→ git-workflow-and-versioning
+CI/CD ───────────────────→ ci-cd-and-automation
+本番デプロイ ─────────────→ shipping-and-launch
+```
+
+## スキル適用ルール
+
+1. 該当スキルが 1% でも当てはまるなら、実装前にスキルファイルを読む
+2. スキルは提案ではなくワークフロー。検証ステップを飛ばさない
+3. 複数スキルが当てはまる場合は順番に適用（例: spec → plan → build → review）
+4. 非自明な作業で仕様がなければ `spec-driven-development` から始める
+5. 補助資料は必要時のみ `references/` を参照する
+
+## 成果物
+
+- `/spec` 相当: プロジェクトルートに `SPEC.md`
+- `/plan` 相当: `tasks/plan.md`, `tasks/todo.md`
+- 作業中はバージョン管理に含め、スコープ変更時に更新する
