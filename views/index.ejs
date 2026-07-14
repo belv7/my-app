@@ -636,6 +636,7 @@
               <div>
                 <label for="dueDate">締切日時</label>
                 <input id="dueDate" type="datetime-local" name="dueDate">
+                <input type="hidden" name="dueDateUtc" value="">
               </div>
               <button class="primary" type="submit">タスクを追加</button>
             </form>
@@ -677,6 +678,7 @@
                           <div>
                             <label for="edit-dueDate-<%= task.id %>">締切日時</label>
                             <input id="edit-dueDate-<%= task.id %>" type="datetime-local" name="dueDate" value="<%= task.dueDateInput %>">
+                            <input type="hidden" name="dueDateUtc" value="">
                           </div>
                           <button class="secondary" type="submit">変更を保存</button>
                         </form>
@@ -781,6 +783,7 @@
                           <div>
                             <label for="edit-dueDate-<%= task.id %>">締切日時</label>
                             <input id="edit-dueDate-<%= task.id %>" type="datetime-local" name="dueDate" value="<%= task.dueDateInput %>">
+                            <input type="hidden" name="dueDateUtc" value="">
                           </div>
                           <button class="secondary" type="submit">変更を保存</button>
                         </form>
@@ -1519,6 +1522,28 @@
         wireGroup("past", "show-all-past-tasks");
       }
 
+      function wireDueDateUtcSerialization() {
+        const forms = Array.from(document.querySelectorAll("form"));
+        forms.forEach((form) => {
+          const dueDateInput = form.querySelector("input[name='dueDate']");
+          const dueDateUtcInput = form.querySelector("input[name='dueDateUtc']");
+          if (!(dueDateInput instanceof HTMLInputElement) || !(dueDateUtcInput instanceof HTMLInputElement)) {
+            return;
+          }
+
+          form.addEventListener("submit", () => {
+            const raw = String(dueDateInput.value || "").trim();
+            if (!raw) {
+              dueDateUtcInput.value = "";
+              return;
+            }
+
+            const parsed = new Date(raw);
+            dueDateUtcInput.value = Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+          });
+        });
+      }
+
       const state = readState();
       let active = null;
       let lastDrop = 0;
@@ -1529,6 +1554,7 @@
       enforceTopOutResetIfNeeded();
       wireToggleChoiceFlow();
       wireTaskListLimit();
+      wireDueDateUtcSerialization();
       watchDeadlineHazards();
 
       function gameLoop(ts) {

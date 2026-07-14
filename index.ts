@@ -108,7 +108,13 @@ function toTaskViewModel(task: {
   };
 }
 
-function parseDueDate(value: unknown): { dueDate: Date | null; valid: boolean } {
+function parseDueDate(value: unknown, dueDateUtcValue?: unknown): { dueDate: Date | null; valid: boolean } {
+  const dueDateUtc = String(dueDateUtcValue ?? "").trim();
+  if (dueDateUtc) {
+    const dueDate = new Date(dueDateUtc);
+    return { dueDate, valid: !Number.isNaN(dueDate.getTime()) };
+  }
+
   const dueDateValue = String(value ?? "").trim();
   if (!dueDateValue) {
     return { dueDate: null, valid: true };
@@ -176,7 +182,7 @@ app.post("/tasks", async (req, res) => {
 
   const title = String(req.body.title ?? "").trim();
   const description = String(req.body.description ?? "").trim();
-  const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate);
+  const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate, req.body.dueDateUtc);
 
   if (title && hasValidDueDate) {
     await prisma.task.create({
@@ -209,7 +215,7 @@ app.post("/tasks/:id/edit", async (req, res) => {
 
   const title = String(req.body.title ?? "").trim();
   const description = String(req.body.description ?? "").trim();
-  const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate);
+  const { dueDate, valid: hasValidDueDate } = parseDueDate(req.body.dueDate, req.body.dueDateUtc);
   const progressRate = clampInt(req.body.progressRate, 0, 100, 0);
   const plannedMinutes = clampInt(req.body.plannedMinutes, 1, 480, 30);
   const actualMinutes = clampInt(req.body.actualMinutes, 0, 480, 0);
